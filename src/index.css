@@ -1,3 +1,23 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-yellowLight: #DBC170;
+  --color-yellow: #B8952E;
+  --color-yellowDark: #846F2E;
+
+  --color-gray100: #F5F4F5;
+  --color-gray200: #B2AFB6;
+  --color-gray300: #98959D;
+  --color-gray400: #7A767F;
+  --color-gray500: #3E3C41;
+  --color-gray600: #2E2C30;
+  --color-gray700: #232225;
+  --color-gray800: #19181B;
+  --color-gray900: #050505;
+}
+
+body {
+  background-color: var(--color-gray800);
+  min-height: 100vh;
+  font-family: "Catamaran", sans-serif;
+}

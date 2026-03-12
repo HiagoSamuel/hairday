@@ -1,6 +1,6 @@
 export type Appointment = {
   id: string
-  client: string
+  name: string
   date: string
   time: string
 }
