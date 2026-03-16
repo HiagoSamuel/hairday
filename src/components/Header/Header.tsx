@@ -15,10 +15,6 @@ export function Header({ selectedDate, onDateChange, appointments, onRequestRemo
   // Ref para detectar cliques fora do dropdown
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const formattedDate = selectedDate
-    ? new Date(selectedDate + "T00:00:00").toLocaleDateString("pt-BR")
-    : "Selecione uma data"
-
   // Filtra os agendamentos da data selecionada (ou todos se nenhuma data)
   const visibleAppointments = selectedDate
     ? appointments.filter((a) => a.date === selectedDate)
