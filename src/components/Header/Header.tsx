@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "../../contexts/AuthContext"
 import type { Appointment } from "../../types/Appointment"
 
 type Props = {
@@ -9,42 +11,40 @@ type Props = {
 }
 
 export function Header({ selectedDate, onDateChange, appointments, onRequestRemove }: Props) {
-  // Controla se o dropdown está aberto ou fechado
   const [dropdownOpen, setDropdownOpen] = useState(false)
-
-  // Ref para detectar cliques fora do dropdown
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Filtra os agendamentos da data selecionada (ou todos se nenhuma data)
+  // ✅ Adicionado para logout
+  const { logout, user } = useAuth()
+  const navigate = useNavigate()
+
   const visibleAppointments = selectedDate
     ? appointments.filter((a) => a.date === selectedDate)
     : appointments
 
-  // Fecha o dropdown ao clicar fora dele
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      // Se o clique foi fora do elemento referenciado pelo dropdownRef, fecha
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false)
       }
     }
-
-    // Adiciona o listener quando o dropdown está aberto
     if (dropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside)
     }
-
-    // Cleanup — remove o listener quando o componente desmonta ou dropdown fecha
-    // ⚠️ Sem o cleanup, o listener continua ativo mesmo após fechar o dropdown,
-    // acumulando múltiplos listeners e causando bugs difíceis de rastrear
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [dropdownOpen])
 
   function handleSelect(id: string | "all") {
-    setDropdownOpen(false)   // fecha o dropdown
-    onRequestRemove(id)      // avisa o App qual opção foi escolhida
+    setDropdownOpen(false)
+    onRequestRemove(id)
+  }
+
+  // ✅ Adicionado para logout
+  function handleLogout() {
+    logout()
+    navigate("/login")
   }
 
   return (
@@ -61,9 +61,18 @@ export function Header({ selectedDate, onDateChange, appointments, onRequestRemo
       {/* Controles à direita */}
       <div className="flex items-center gap-3">
 
+        {/* ✅ Botão de Logout — adicionado */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray600 text-gray400 text-sm hover:border-red-400 hover:text-red-400 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256">
+            <path d="M120,216a8,8,0,0,1-8,8H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32h64a8,8,0,0,1,0,16H48V208h64A8,8,0,0,1,120,216Zm109.66-93.66-40-40a8,8,0,0,0-11.32,11.32L204.69,120H112a8,8,0,0,0,0,16h92.69l-26.35,26.34a8,8,0,0,0,11.32,11.32l40-40A8,8,0,0,0,229.66,122.34Z"/>
+          </svg>
+          {user?.name ?? "Sair"}
+        </button>
+
         {/* Botão Desmarcar + Dropdown */}
-        {/* O "relative" aqui é fundamental — o dropdown usa "absolute" e se posiciona
-            em relação ao pai mais próximo com position não-static, que é esse div */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((prev) => !prev)}
@@ -76,11 +85,8 @@ export function Header({ selectedDate, onDateChange, appointments, onRequestRemo
             Desmarcar
           </button>
 
-          {/* Dropdown — só renderiza quando dropdownOpen é true */}
           {dropdownOpen && (
             <div className="absolute right-0 top-full mt-2 w-64 bg-gray800 border border-gray600 rounded-xl shadow-xl z-40 overflow-hidden">
-
-              {/* Opção: Todos */}
               <button
                 onClick={() => handleSelect("all")}
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 font-bold hover:bg-gray700 transition-colors border-b border-gray600"
@@ -91,7 +97,6 @@ export function Header({ selectedDate, onDateChange, appointments, onRequestRemo
                 Todos os clientes
               </button>
 
-              {/* Lista de agendamentos visíveis */}
               {visibleAppointments.length === 0 ? (
                 <p className="px-4 py-3 text-gray500 text-sm text-center">
                   Nenhum agendamento nesta data.
