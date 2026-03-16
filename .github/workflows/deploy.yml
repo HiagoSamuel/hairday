@@ -38,3 +38,4 @@ jobs:
 
       - name: Deploy para produção
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        
